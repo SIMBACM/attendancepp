@@ -1,0 +1,75 @@
+import 'package:camera/camera.dart';
+import 'package:flutter/material.dart';
+import 'package:all_project/Viewmodel/widgets/checkinandoutwidget.dart';
+
+class Cameraqr extends StatefulWidget {
+   Cameraqr({super.key});
+
+  @override
+  State<Cameraqr> createState() => _CameraqrState();
+}
+
+class _CameraqrState extends State<Cameraqr> {
+  CameraController? _cameraController;
+  bool _isCameraInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeCamera();
+  }
+
+  Future<void> _initializeCamera() async {
+    final cameras = await availableCameras();
+    final frontCamera = cameras.firstWhere(
+      (camera) => camera.lensDirection == CameraLensDirection.front,
+    );
+
+    _cameraController = CameraController(
+      frontCamera,
+      ResolutionPreset.medium,
+      enableAudio: false,
+    );
+
+    await _cameraController!.initialize();
+    setState(() {
+      _isCameraInitialized = true;
+    });
+  }
+
+  @override
+  void dispose() {
+    _cameraController?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: _isCameraInitialized
+          ? Column(
+              children: [
+                // 👇 CameraPreview is active but invisible
+                Opacity(
+                  opacity: 0,
+                  child: SizedBox(
+                    height: 600,
+                    width: double.infinity,
+                    child: CameraPreview(_cameraController!),
+                  ),
+                ),
+                 SizedBox(height: 16),
+                cameraheading(
+                  "Scan the Qr",
+                  "Point the Qr right at the box",
+                  "then take a photo",
+                ),
+                 SizedBox(height: 50),
+                customIconbutton(context),
+              ],
+            )
+          :  Center(child: CircularProgressIndicator()),
+    );
+  }
+}
